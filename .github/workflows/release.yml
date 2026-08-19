@@ -23,17 +23,9 @@ jobs:
           GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Ensure GitHub release assets
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          shopt -s nullglob
-          assets=(.release/*.zip .release/release.json)
-          if [ ${#assets[@]} -eq 0 ]; then
-            echo "No packaged release assets were produced."
-            exit 1
-          fi
-          if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
-          fi
-          gh release upload "$GITHUB_REF_NAME" "${assets[@]}" --clobber
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            .release/*.zip
+            .release/release.json

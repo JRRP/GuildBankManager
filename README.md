@@ -224,3 +224,6 @@ Guild-rank withdrawal limits are intentionally outside this addon's scope.
 
 ## 1.1.7
 - Finalized automated GitHub release packaging for URL-based addon managers.
+
+## 1.1.8
+- Corrected GitHub Release asset publishing in the automated packaging workflow.
