@@ -48,12 +48,6 @@ Then enable the addon and use `/gbm`.
 - **Build Auction List** creates a temporary, exact-quality Auctionator restock list.
 - **Manage Profiles** saves, imports, and exports shareable layouts.
 
-## Safety
-
-The sorter queues one verified guild-bank transaction at a time. It stops on combat, bank closure, repeated locked-slot or cursor failures, insufficient Storage space, missing stock, or missing bank permissions.
-
-Guild-rank withdrawal limits are intentionally outside this addon's scope.
-
 ## Releases
 
 See [CHANGELOG.md](CHANGELOG.md) for the complete version history and the [GitHub Releases page](https://github.com/JRRP/GuildBankManager/releases) for downloadable packages.
