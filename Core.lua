@@ -2,7 +2,7 @@ local ADDON, GBM = ...
 _G[ADDON] = GBM
 
 GBM.name = ADDON
-GBM.version = "1.1.6"
+GBM.version = "1.1.7"
 GBM.MAX_TABS = 8
 GBM.SLOTS_PER_TAB = 98
 

@@ -221,3 +221,6 @@ Guild-rank withdrawal limits are intentionally outside this addon's scope.
 ## 1.1.6
 - Added Baganator-compatible guild-bank detection through Retail player-interaction events.
 - Deduplicated overlapping Blizzard and player-interaction open/close notifications.
+
+## 1.1.7
+- Finalized automated GitHub release packaging for URL-based addon managers.

@@ -2,7 +2,7 @@
 ## Title: Guild Bank Manager
 ## Notes: Guild consumable stock management
 ## Author: Scruzz
-## Version: 1.1.6
+## Version: 1.1.7
 ## IconTexture: Interface\Icons\Achievement_GuildPerk_CashFlow
 ## SavedVariables: GuildBankManagerDB
 ## OptionalDeps: Auctionator
