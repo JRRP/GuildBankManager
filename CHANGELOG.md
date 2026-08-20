@@ -2,6 +2,13 @@
 
 All notable changes to Guild Bank Manager are documented here.
 
+## 1.1.9
+- Added mode-based colors to guild-tab names, mode buttons, and the selected-tab heading.
+- Refined configured-item rows with improved spacing, alignment, and vertically centered icons and Remove buttons.
+- Centered the Operations heading and description.
+- Updated the item drop prompt to use the interface accent blue.
+- Reduced the status panel and window footer height while keeping status messages on one line.
+
 ## 1.1.8
 - Corrected GitHub Release asset publishing in the automated packaging workflow.
 
