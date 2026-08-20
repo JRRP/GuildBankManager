@@ -35,6 +35,11 @@ end
 local tabButtons = {}
 local modeButtons = {}
 local MODE_LABELS={public="SORTED",storage="STORAGE",ignore="IGNORED"}
+local MODE_TEXT_COLORS={
+    public={0.39,0.83,0.44},
+    storage={0.95,0.78,0.15},
+    ignore={0.84,0.48,0.15},
+}
 
 StaticPopupDialogs["GBM_CONFIRM_TAB_MODE"]={
     text="Change this tab mode?",
@@ -162,25 +167,25 @@ end
 
 local function RuleRow(parent, rule, index, y)
     local r = CreateFrame("Frame", nil, parent,"BackdropTemplate")
-    r:SetSize(465,72); r:SetPoint("TOPLEFT",0,y)
+    r:SetSize(465,76); r:SetPoint("TOPLEFT",0,y)
     SetBackdrop(r,{0.055,0.06,0.07,0.85},{0.13,0.14,0.16,1})
 
     local icon = r:CreateTexture(nil,"ARTWORK")
-    icon:SetSize(32,32); icon:SetPoint("TOPLEFT",6,-7); icon:SetTexture(rule.icon or C_Item.GetItemIconByID(rule.itemID))
+    icon:SetSize(40,40); icon:SetPoint("LEFT",8,0); icon:SetTexture(rule.icon or C_Item.GetItemIconByID(rule.itemID))
 
     local n = r:CreateFontString(nil,"OVERLAY","GameFontNormal")
-    n:SetPoint("TOPLEFT",44,-8); n:SetWidth(405); n:SetJustifyH("LEFT"); n:SetText(rule.link or rule.name or ("Item "..rule.itemID))
+    n:SetPoint("TOPLEFT",54,-9); n:SetWidth(390); n:SetJustifyH("LEFT"); n:SetText(rule.link or rule.name or ("Item "..rule.itemID))
 
-    MakeNumberBox(r,44,rule.stackSize,function(v) rule.stackSize=math.max(1,math.floor(v)) end,false,-2)
-    MakeNumberBox(r,119,rule.slots,function(v) rule.slots=math.max(0,math.floor(v)) end,false,-2)
-    MakeNumberBox(r,194,rule.reserveMultiplier or GBM.db.options.backupMultiplier or 2,function(v) rule.reserveMultiplier=math.max(0,v) end,true,-2)
+    MakeNumberBox(r,54,rule.stackSize,function(v) rule.stackSize=math.max(1,math.floor(v)) end,false,-3)
+    MakeNumberBox(r,130,rule.slots,function(v) rule.slots=math.max(0,math.floor(v)) end,false,-3)
+    MakeNumberBox(r,206,rule.reserveMultiplier or GBM.db.options.backupMultiplier or 2,function(v) rule.reserveMultiplier=math.max(0,v) end,true,-3)
 
-    local a = r:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall"); a:SetPoint("LEFT",44,-18); a:SetText("stack")
-    local b = r:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall"); b:SetPoint("LEFT",119,-18); b:SetText("slots")
-    local c = r:CreateFontString(nil,"OVERLAY","GameFontHighlight"); c:SetPoint("LEFT",194,-18); c:SetText("backup X")
+    local a = r:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall"); a:SetPoint("LEFT",54,-21); a:SetText("stack")
+    local b = r:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall"); b:SetPoint("LEFT",130,-21); b:SetText("slots")
+    local c = r:CreateFontString(nil,"OVERLAY","GameFontHighlight"); c:SetPoint("LEFT",206,-21); c:SetText("backup X")
 
     local rem = DarkButton(r,"Remove")
-    rem:SetSize(90,24); rem:SetPoint("LEFT",320,-7); rem:SetText("Remove")
+    rem:SetSize(90,28); rem:SetPoint("RIGHT",-14,0); rem:SetText("Remove")
     rem.gbmBaseColor={0.34,0.055,0.055,1}
     rem:SetBackdropColor(unpack(rem.gbmBaseColor))
     rem:SetBackdropBorderColor(0.72,0.12,0.12,1)
@@ -194,6 +199,7 @@ local function DropBox(parent)
     SetBackdrop(b,{0.035,0.04,0.05,1},COLORS.accent)
     local fs = b:CreateFontString(nil,"OVERLAY","GameFontNormal")
     fs:SetPoint("CENTER"); fs:SetText("Drag an item here to add it to " .. ActualTabName(selectedTab))
+    fs:SetTextColor(unpack(COLORS.accent))
     local function Drop()
         local id,link=CursorItem()
         if not id then GBM:Print("Drag an item from your bags or guild bank onto the box."); return end
@@ -373,6 +379,9 @@ local function RefreshTabButtons()
         if b then
             local name = ActualTabName(i)
             FitButtonText(b,name,81)
+            local cfg=GBM.db.tabs[i]
+            local color=MODE_TEXT_COLORS[(cfg and cfg.mode) or "ignore"]
+            if b:GetFontString() and color then b:GetFontString():SetTextColor(unpack(color)) end
             b:SetShown(i <= n or (GetNumGuildBankTabs() or 0) == 0)
             if i == selectedTab then
                 b:LockHighlight()
@@ -385,6 +394,8 @@ end
 
 local function RefreshModeButtons(mode)
     for m,b in pairs(modeButtons) do
+        local color=MODE_TEXT_COLORS[m]
+        if b:GetFontString() and color then b:GetFontString():SetTextColor(unpack(color)) end
         if m == mode then b:LockHighlight() else b:UnlockHighlight() end
     end
 end
@@ -401,26 +412,28 @@ function GBM:RefreshUI()
     local cfg = self.db.tabs[selectedTab]
     local realName = ActualTabName(selectedTab)
     tabTitle:SetText(realName .. "  —  " .. (MODE_LABELS[cfg.mode] or string.upper(cfg.mode)))
+    local titleColor=MODE_TEXT_COLORS[cfg.mode]
+    if titleColor then tabTitle:SetTextColor(unpack(titleColor)) end
     RefreshModeButtons(cfg.mode)
     WipeChildren(content)
 
     if cfg.mode == "public" then
-        tabDesc:SetText("SORTED — GBM fills the configured layout below. Matching stock elsewhere on this tab counts toward the total; excess returns to Storage while unrelated items remain untouched.")
+        tabDesc:SetText("GBM fills the configured layout below. Matching stock elsewhere on this tab counts toward the total; excess returns to Storage while unrelated items remain untouched.")
         local drop = DropBox(content); drop:SetPoint("TOPLEFT",0,-4)
         local y = -66
         for i,rule in ipairs(cfg.rules) do RuleRow(content,rule,i,y); y=y-78 end
         content:SetHeight(math.max(430,-y+20))
     elseif cfg.mode == "storage" then
-        tabDesc:SetText("STORAGE — unrestricted shared stockpile. No item rules are needed; GBM searches this tab whenever a Sorted tab needs stock.")
+        tabDesc:SetText("Unrestricted shared stockpile. No item rules are needed; GBM searches this tab whenever a Sorted tab needs stock.")
         local fs = content:CreateFontString(nil,"OVERLAY","GameFontNormalLarge")
         fs:SetPoint("TOPLEFT",8,-16); fs:SetWidth(445); fs:SetJustifyH("LEFT")
         fs:SetText("Shared Storage\n\nDump anything here. GBM only removes items when a configured Sorted tab needs them. There is no per-item storage layout.")
         content:SetHeight(430)
     else
-        tabDesc:SetText("IGNORED — GBM never intentionally moves items into or out of this tab.")
+        tabDesc:SetText("GBM never intentionally moves items into or out of this tab.")
         local fs = content:CreateFontString(nil,"OVERLAY","GameFontNormalLarge")
         fs:SetPoint("TOPLEFT",8,-16); fs:SetWidth(445); fs:SetJustifyH("LEFT")
-        fs:SetText("Ignored by Guild Bank Manager\n\nUse this for officer items, event items, or anything GBM should never touch.")
+        fs:SetText("Ignored by Guild Bank Manager\n\nUse this for anything GBM should never touch.")
         content:SetHeight(430)
     end
 
@@ -432,7 +445,7 @@ local function BuildUI()
 
     UI = CreateFrame("Frame","GuildBankManagerFrame",UIParent,"BackdropTemplate")
     table.insert(UISpecialFrames,"GuildBankManagerFrame")
-    UI:SetSize(790,690)
+    UI:SetSize(790,656)
     local savedPosition=GBM.db.options.windowPosition
     if type(savedPosition)=="table" and tonumber(savedPosition.x) and tonumber(savedPosition.y) then
         UI:SetPoint("CENTER",UIParent,"CENTER",tonumber(savedPosition.x),tonumber(savedPosition.y))
@@ -522,9 +535,10 @@ local function BuildUI()
 
     local operationsPanel = CreatePanel(UI, 544, -178, 215, 430)
     local operationsTitle=operationsPanel:CreateFontString(nil,"OVERLAY","GameFontNormalLarge")
-    operationsTitle:SetPoint("TOPLEFT",14,-14); operationsTitle:SetText("Operations"); operationsTitle:SetTextColor(0.25,0.65,0.95)
+    operationsTitle:SetPoint("TOPLEFT",14,-14); operationsTitle:SetWidth(187); operationsTitle:SetJustifyH("CENTER")
+    operationsTitle:SetText("Operations"); operationsTitle:SetTextColor(0.25,0.65,0.95)
     local operationsDesc=operationsPanel:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall")
-    operationsDesc:SetPoint("TOPLEFT",14,-42); operationsDesc:SetWidth(187); operationsDesc:SetJustifyH("LEFT")
+    operationsDesc:SetPoint("TOPLEFT",14,-42); operationsDesc:SetWidth(187); operationsDesc:SetJustifyH("CENTER")
     operationsDesc:SetText("Bank-wide tools and saved layouts")
 
     local sort=DarkButton(operationsPanel,"SCAN & SORT BANK")
@@ -573,12 +587,12 @@ local function BuildUI()
     -- Dedicated status bar.  The old summary text and status text occupied the
     -- same bottom-left area, which caused messages such as "Guild bank open."
     -- to draw over the summary.  Keep the status in its own panel instead.
-    local statusPanel = CreatePanel(UI, 14, -617, 745, 48)
+    local statusPanel = CreatePanel(UI, 14, -617, 745, 30)
     status = statusPanel:CreateFontString(nil,"OVERLAY","GameFontHighlightSmall")
     status:SetPoint("LEFT",12,0)
     status:SetWidth(720)
     status:SetJustifyH("LEFT")
-    status:SetWordWrap(true)
+    status:SetWordWrap(false)
 
 end
 
